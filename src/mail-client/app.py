@@ -29,7 +29,6 @@ def send_email():
         part = MIMEApplication(file.read(), Name=file.filename)
         part['Content-Disposition'] = f'attachment; filename="{file.filename}"'
         msg.attach(part)
-    breakpoint()
 
     try:
         # Connect to the SMTP server
