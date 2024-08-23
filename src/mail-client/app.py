@@ -4,9 +4,12 @@ from flask_cors import CORS
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 from email.mime.text import MIMEText
+import mimetypes
+from email import encoders
+from email.mime.base import MIMEBase
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:8000"]) # allow only the form origin
+CORS(app)
 
 @app.route('/send-email', methods=['POST'])
 def send_email():
@@ -26,8 +29,11 @@ def send_email():
     # Attach the file, if provided
     if file:
         # Read the file content and attach it
-        part = MIMEApplication(file.read(), Name=file.filename)
-        part['Content-Disposition'] = f'attachment; filename="{file.filename}"'
+        mime_type, encoding = mimetypes.guess_type(file.filename)
+        part = MIMEBase(mime_type.split('/')[0],mime_type.split('/')[1])
+        part.set_payload(file.read())
+        encoders.encode_base64(part)
+        part.add_header('Content-Disposition', f'attachment; filename={file.filename}')
         msg.attach(part)
 
     try:
@@ -41,4 +47,5 @@ def send_email():
 
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(host='0.0.0.0', port=8000, debug=True)
+
